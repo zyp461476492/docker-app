@@ -11,7 +11,7 @@ import (
 /**
 返回 client 客户端查询的所有 image 信息
 */
-func listImage(cli *client.Client) []types.ImageSummary {
+func List(cli *client.Client) []types.ImageSummary {
 	ctx := context.Background()
 	imageList, err := cli.ImageList(ctx, types.ImageListOptions{})
 
@@ -26,7 +26,7 @@ func listImage(cli *client.Client) []types.ImageSummary {
 /**
 返回 id 对应 image 的历史信息
 */
-func imageHistory(cli *client.Client, id string) []types.ImageHistory {
+func History(cli *client.Client, id string) []types.ImageHistory {
 	ctx := context.Background()
 	historyList, err := cli.ImageHistory(ctx, id)
 

@@ -15,7 +15,7 @@ func TestImageList(t *testing.T) {
 
 	cli := client.GetClient(asset)
 
-	res := listImage(cli)
+	res := List(cli)
 
 	t.Log(res)
 }

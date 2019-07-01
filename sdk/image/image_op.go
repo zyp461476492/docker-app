@@ -10,7 +10,7 @@ import (
 /**
 修改 id 对应 image 的 tag
 */
-func imageTag(cli *client.Client, id, tag string) bool {
+func changeTag(cli *client.Client, id, tag string) bool {
 	ctx := context.Background()
 	err := cli.ImageTag(ctx, id, tag)
 
