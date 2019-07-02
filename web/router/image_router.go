@@ -11,18 +11,30 @@ import (
 )
 
 func list(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	id, err := strconv.Atoi(r.Form.Get("id"))
 	if err != nil {
-		log.Fatalln(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	// 根据 ID 获取 docker 资源信息
 	asset := types.DockerAsset{Id: id}
-	cli := client.GetClient(asset)
+	cli, err := client.GetClient(asset)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	jsonByte, err := json.Marshal(image.List(cli))
 
 	if err != nil {
-		log.Fatalln(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	value, err := w.Write(jsonByte)
@@ -41,7 +53,12 @@ func history(w http.ResponseWriter, r *http.Request) {
 	imageId := r.Form.Get("imageId")
 	// 根据 ID 获取 docker 资源信息
 	asset := types.DockerAsset{Id: assetId}
-	cli := client.GetClient(asset)
+	cli, err := client.GetClient(asset)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	jsonByte, err := json.Marshal(image.History(cli, imageId))
 

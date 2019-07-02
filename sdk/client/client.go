@@ -9,17 +9,11 @@ import (
 	"strconv"
 )
 
-func GetClient(asset localType.DockerAsset) *client.Client {
+func GetClient(asset localType.DockerAsset) (*client.Client, error) {
 	// tcp://192.168.184.123:2376
 	host := "tcp://" + asset.Ip + ":" + strconv.Itoa(asset.Port)
 	cli, err := client.NewClient(host, asset.Version, nil, nil)
-
-	if err != nil {
-		log.Fatalf("get client fail, %v", asset)
-		return nil
-	}
-
-	return cli
+	return cli, err
 }
 
 func GetClientInfo(cli *client.Client) types.Info {
