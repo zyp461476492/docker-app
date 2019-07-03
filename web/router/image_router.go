@@ -2,9 +2,9 @@ package router
 
 import (
 	"encoding/json"
-	"github.com/zyp461476492/sync-app/sdk/client"
-	"github.com/zyp461476492/sync-app/sdk/image"
-	"github.com/zyp461476492/sync-app/types"
+	"github.com/zyp461476492/docker-app/sdk/client"
+	"github.com/zyp461476492/docker-app/sdk/image"
+	"github.com/zyp461476492/docker-app/types"
 	"log"
 	"net/http"
 	"strconv"
@@ -30,7 +30,13 @@ func list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonByte, err := json.Marshal(image.List(cli))
+	imageList, err := image.List(cli)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonByte, err := json.Marshal(imageList)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -60,7 +66,13 @@ func history(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonByte, err := json.Marshal(image.History(cli, imageId))
+	history, err := image.History(cli, imageId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonByte, err := json.Marshal(history)
 
 	if err != nil {
 		log.Fatalln(err)

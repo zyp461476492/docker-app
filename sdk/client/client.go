@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	localType "github.com/zyp461476492/sync-app/types"
+	localType "github.com/zyp461476492/docker-app/types"
 	"log"
 	"strconv"
 )

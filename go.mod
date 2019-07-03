@@ -1,4 +1,4 @@
-module github.com/zyp461476492/sync-app
+module github.com/zyp461476492/docker-app
 
 go 1.12
 
@@ -10,5 +10,6 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
+	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65 // indirect
 )

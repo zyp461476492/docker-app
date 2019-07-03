@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/zyp461476492/sync-app/web/router"
+	"github.com/zyp461476492/docker-app/web/router"
 	"log"
 	"net/http"
 	"time"

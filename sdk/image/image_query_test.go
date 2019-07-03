@@ -1,8 +1,8 @@
 package image
 
 import (
-	"github.com/zyp461476492/sync-app/sdk/client"
-	"github.com/zyp461476492/sync-app/types"
+	"github.com/zyp461476492/docker-app/sdk/client"
+	"github.com/zyp461476492/docker-app/types"
 	"testing"
 )
 
@@ -13,9 +13,17 @@ func TestImageList(t *testing.T) {
 		Version: "v1.39",
 	}
 
-	cli := client.GetClient(asset)
+	cli, err := client.GetClient(asset)
 
-	res := List(cli)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := List(cli)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t.Log(res)
 }

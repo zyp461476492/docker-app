@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"log"
@@ -18,4 +18,8 @@ func getIntValue(r *http.Request, key string) int {
 		return -1
 	}
 	return res
+}
+
+func LogHttpError(err error, w *http.ResponseWriter) {
+	http.Error(*w, err.Error(), http.StatusInternalServerError)
 }

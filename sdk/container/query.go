@@ -5,44 +5,22 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"io"
-	"log"
 )
 
-func List(cli *client.Client) []types.Container {
+func List(cli *client.Client) ([]types.Container, error) {
 	ctx := context.Background()
-	list, err := cli.ContainerList(ctx, types.ContainerListOptions{})
-
-	if err != nil {
-		log.Fatalf("list container fail, %v", err)
-		return nil
-	}
-
-	return list
+	return cli.ContainerList(ctx, types.ContainerListOptions{})
 }
 
 /**
 container id or name
 */
-func logs(cli *client.Client, container string) io.ReadCloser {
+func logs(cli *client.Client, container string) (io.ReadCloser, error) {
 	ctx := context.Background()
-	stream, err := cli.ContainerLogs(ctx, container, types.ContainerLogsOptions{})
-
-	if err != nil {
-		log.Fatalf("logs container fail, %v", err)
-		return nil
-	}
-
-	return stream
+	return cli.ContainerLogs(ctx, container, types.ContainerLogsOptions{})
 }
 
-func diff(cli *client.Client, id string) []types.ContainerChange {
+func diff(cli *client.Client, id string) ([]types.ContainerChange, error) {
 	ctx := context.Background()
-	changeList, err := cli.ContainerDiff(ctx, id)
-
-	if err != nil {
-		log.Fatalf("query diff container fail, %v", err)
-		return nil
-	}
-
-	return changeList
+	return cli.ContainerDiff(ctx, id)
 }
