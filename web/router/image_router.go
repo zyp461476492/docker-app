@@ -51,6 +51,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 }
 
 func history(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
 	assetId, err := strconv.Atoi(r.Form.Get("assetId"))
 	if err != nil {
 		log.Fatalln(err)
