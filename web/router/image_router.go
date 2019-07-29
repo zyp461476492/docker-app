@@ -85,8 +85,3 @@ func history(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("return value %v, err %v", value, err)
 	}
 }
-
-func ConfigRouter() {
-	http.HandleFunc("/image/list", list)
-	http.HandleFunc("/image/history", history)
-}

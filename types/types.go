@@ -3,10 +3,11 @@ package types
 import "time"
 
 type DockerAsset struct {
-	Id         int
-	Ip         string
-	Port       int
-	Version    string
+	Id         int    `storm:"id,increment" json:"id"`
+	Ip         string `storm:"index" json:"ip"`
+	Name       string `storm:"index" json:"name"`
+	Port       int    `json:"port"`
+	Version    string `json:"version"`
 	CreateTime string
 }
 
