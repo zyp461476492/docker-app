@@ -1,16 +1,18 @@
 package database
 
 import (
-	"github.com/boltdb/bolt"
+	"github.com/asdine/storm"
 	"github.com/zyp461476492/docker-app/types"
-	"time"
+	"log"
 )
 
-func GetBoltDB(config *types.Config) (*bolt.DB, error) {
-	return bolt.Open(config.FileLocation,
-		0600, &bolt.Options{Timeout: config.Timeout * time.Millisecond})
+func GetStorm(config *types.Config) (*storm.DB, error) {
+	return storm.Open(config.FileLocation)
 }
 
-func CloseBoltDB(db *bolt.DB) error {
-	return db.Close()
+func CloseStorm(db *storm.DB) {
+	err := db.Close()
+	if err != nil {
+		log.Fatalf("关闭数据库失败 %s", err.Error())
+	}
 }
