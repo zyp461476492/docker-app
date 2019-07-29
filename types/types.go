@@ -14,3 +14,8 @@ type Config struct {
 	FileLocation string
 	Timeout      time.Duration
 }
+
+type RetMsg struct {
+	Res  bool
+	Info string
+}

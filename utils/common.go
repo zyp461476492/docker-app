@@ -49,3 +49,5 @@ func getIntValue(r *http.Request, key string) int {
 func LogHttpError(err error, w *http.ResponseWriter) {
 	http.Error(*w, err.Error(), http.StatusInternalServerError)
 }
+
+var Config = GetConfig("config.json")

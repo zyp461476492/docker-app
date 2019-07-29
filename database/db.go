@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func getBoltDB(config *types.Config) (*bolt.DB, error) {
+func GetBoltDB(config *types.Config) (*bolt.DB, error) {
 	return bolt.Open(config.FileLocation,
 		0600, &bolt.Options{Timeout: config.Timeout * time.Millisecond})
 }
