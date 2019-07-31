@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/zyp461476492/docker-app/types"
 	"github.com/zyp461476492/docker-app/web/service"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,8 +19,8 @@ func addAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	asset := types.DockerAsset{}
-
-	err = json.Unmarshal([]byte(r.FormValue("info")), &asset)
+	jsonStr, err := ioutil.ReadAll(r.Body)
+	err = json.Unmarshal(jsonStr, &asset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -33,6 +34,7 @@ func addAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	value, err := w.Write(jsonByte)
 
 	if err != nil {
@@ -62,6 +64,7 @@ func updateAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	value, err := w.Write(jsonByte)
 
 	if err != nil {
@@ -76,10 +79,11 @@ func deleteAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info := r.Form.Get("info")
+
+	info := r.FormValue("info")
 	idList := strings.Split(info, ",")
 
-	assetList := []types.DockerAsset{}
+	var assetList []types.DockerAsset
 	for _, s := range idList {
 		id, err := strconv.Atoi(s)
 		if err != nil {
@@ -99,6 +103,7 @@ func deleteAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	value, err := w.Write(jsonByte)
 
 	if err != nil {
@@ -130,6 +135,7 @@ func listAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	value, err := w.Write(jsonByte)
 
 	if err != nil {

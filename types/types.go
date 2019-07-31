@@ -1,14 +1,17 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 type DockerAsset struct {
 	Id         int    `storm:"id,increment" json:"id"`
-	Ip         string `storm:"index" json:"ip"`
-	Name       string `storm:"index" json:"name"`
+	Ip         string `json:"ip"`
+	AssetName  string `storm:"index" json:"assetName"`
 	Port       int    `json:"port"`
 	Version    string `json:"version"`
-	CreateTime string
+	CreateTime string `storm:"index"`
+	Status     string `json:"status"`
 }
 
 type Config struct {
