@@ -8,4 +8,5 @@ func ConfigRouter() {
 	http.HandleFunc("/asset/add", addAsset)
 	http.HandleFunc("/asset/update", updateAsset)
 	http.HandleFunc("/asset/delete", deleteAsset)
+	http.HandleFunc("/asset/list", listAsset)
 }

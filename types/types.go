@@ -19,4 +19,5 @@ type Config struct {
 type RetMsg struct {
 	Res  bool
 	Info string
+	Obj  interface{}
 }

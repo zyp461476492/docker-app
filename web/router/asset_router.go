@@ -10,29 +10,22 @@ import (
 	"strings"
 )
 
-func deleteAsset(w http.ResponseWriter, r *http.Request) {
+func addAsset(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	info := r.Form.Get("info")
-	idList := strings.Split(info, ",")
+	asset := types.DockerAsset{}
 
-	assetList := []types.DockerAsset{}
-	for _, s := range idList {
-		id, err := strconv.Atoi(s)
-		if err != nil {
-			log.Fatalf("err param %s", s)
-		} else {
-			asset := types.DockerAsset{Id: id}
-			assetList = append(assetList, asset)
-		}
-
+	err = json.Unmarshal([]byte(r.FormValue("info")), &asset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	msg := service.DeleteAsset(assetList)
+	msg := service.AddAsset(&asset)
 	jsonByte, err := json.Marshal(msg)
 
 	if err != nil {
@@ -76,22 +69,29 @@ func updateAsset(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func addAsset(w http.ResponseWriter, r *http.Request) {
+func deleteAsset(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	asset := types.DockerAsset{}
+	info := r.Form.Get("info")
+	idList := strings.Split(info, ",")
 
-	err = json.Unmarshal([]byte(r.FormValue("info")), &asset)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	assetList := []types.DockerAsset{}
+	for _, s := range idList {
+		id, err := strconv.Atoi(s)
+		if err != nil {
+			log.Fatalf("err param %s", s)
+		} else {
+			asset := types.DockerAsset{Id: id}
+			assetList = append(assetList, asset)
+		}
+
 	}
 
-	msg := service.AddAsset(&asset)
+	msg := service.DeleteAsset(assetList)
 	jsonByte, err := json.Marshal(msg)
 
 	if err != nil {
@@ -104,4 +104,36 @@ func addAsset(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("return value %v, err %v", value, err)
 	}
+}
+
+func listAsset(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	page, err := strconv.Atoi(r.Form.Get("page"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	pageSize, err := strconv.Atoi(r.Form.Get("pageSize"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	msg := service.ListAsset(page, pageSize)
+	jsonByte, err := json.Marshal(msg)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	value, err := w.Write(jsonByte)
+
+	if err != nil {
+		log.Fatalf("return value %v, err %v", value, err)
+	}
+
 }

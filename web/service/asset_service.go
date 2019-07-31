@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/asdine/storm"
 	"github.com/zyp461476492/docker-app/database"
 	"github.com/zyp461476492/docker-app/types"
 	"github.com/zyp461476492/docker-app/utils"
@@ -59,9 +60,21 @@ func DeleteAsset(assetList []types.DockerAsset) types.RetMsg {
 	return types.RetMsg{Res: true, Info: info}
 }
 
-func ListAsset(pageSize, page int) []types.DockerAsset {
-	lo := (page - 1) * pageSize
-	hi := page * pageSize
-	fmt.Println(lo, hi)
-	return nil
+func ListAsset(page, pageSize int) types.RetMsg {
+	db, err := database.GetStorm(utils.Config)
+	if err != nil {
+		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL, Obj: nil}
+	}
+	var assetList []types.DockerAsset
+	skip := 0
+	if (page - 1) > 0 {
+		skip = (page - 1) * pageSize
+	}
+	err = db.All(&assetList, storm.Limit(pageSize), storm.Skip(skip))
+	if err != nil {
+		return types.RetMsg{Res: false, Info: types.FAIL, Obj: nil}
+	}
+
+	database.CloseStorm(db)
+	return types.RetMsg{Res: true, Info: types.SUCCESS, Obj: assetList}
 }
