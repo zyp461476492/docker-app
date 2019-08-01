@@ -79,7 +79,6 @@ func deleteAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	info := r.FormValue("info")
 	idList := strings.Split(info, ",")
 
@@ -141,5 +140,33 @@ func listAsset(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("return value %v, err %v", value, err)
 	}
+}
 
+func dockerInfo(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := strconv.Atoi(r.Form.Get("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	msg := service.DockerInfo(id)
+	jsonByte, err := json.Marshal(msg)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	value, err := w.Write(jsonByte)
+
+	if err != nil {
+		log.Fatalf("return value %v, err %v", value, err)
+	}
 }

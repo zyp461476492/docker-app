@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/asdine/storm"
 	"github.com/zyp461476492/docker-app/database"
+	"github.com/zyp461476492/docker-app/sdk/client"
 	"github.com/zyp461476492/docker-app/types"
 	"github.com/zyp461476492/docker-app/utils"
 	"time"
@@ -12,6 +13,7 @@ import (
 func AddAsset(asset *types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
 	}
 
@@ -20,6 +22,7 @@ func AddAsset(asset *types.DockerAsset) types.RetMsg {
 	err = db.Save(asset)
 
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: err.Error()}
 	}
 
@@ -30,12 +33,14 @@ func AddAsset(asset *types.DockerAsset) types.RetMsg {
 func UpdateAsset(asset *types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
 	}
 
 	err = db.Update(asset)
 
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: err.Error()}
 	}
 
@@ -46,6 +51,7 @@ func UpdateAsset(asset *types.DockerAsset) types.RetMsg {
 func DeleteAsset(assetList []types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
 	}
 
@@ -66,6 +72,7 @@ func DeleteAsset(assetList []types.DockerAsset) types.RetMsg {
 func ListAsset(page, pageSize int) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
 
@@ -76,11 +83,13 @@ func ListAsset(page, pageSize int) types.RetMsg {
 	}
 	err = db.All(&assetList, storm.Limit(pageSize), storm.Skip(skip))
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
 
 	total, err := db.Count(&types.DockerAsset{})
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
 
@@ -89,4 +98,33 @@ func ListAsset(page, pageSize int) types.RetMsg {
 	obj["total"] = total
 	database.CloseStorm(db)
 	return types.RetMsg{Res: true, Info: types.SUCCESS, Obj: obj}
+}
+
+func DockerInfo(id int) types.RetMsg {
+	db, err := database.GetStorm(utils.Config)
+	if err != nil {
+		database.CloseStorm(db)
+		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	asset := types.DockerAsset{}
+	err = db.One("Id", id, &asset)
+	if err != nil {
+		database.CloseStorm(db)
+		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	cli, err := client.GetClient(asset)
+	if err != nil {
+		database.CloseStorm(db)
+		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	info, err := client.GetClientInfo(cli)
+	if err != nil {
+		database.CloseStorm(db)
+		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+	database.CloseStorm(db)
+	return types.RetMsg{Res: true, Info: types.SUCCESS, Obj: info}
 }
