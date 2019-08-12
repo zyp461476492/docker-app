@@ -6,8 +6,14 @@ import (
 	"log"
 )
 
+var cli *storm.DB
+
 func GetStorm(config *types.Config) (*storm.DB, error) {
-	return storm.Open(config.FileLocation)
+	if cli == nil {
+		cli, err := storm.Open(config.FileLocation)
+		return cli, err
+	}
+	return cli, nil
 }
 
 func CloseStorm(db *storm.DB) {

@@ -149,7 +149,7 @@ func dockerInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(r.Form.Get("id"))
+	id, err := strconv.Atoi(r.Form.Get("index"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

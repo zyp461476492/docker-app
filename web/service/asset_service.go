@@ -7,6 +7,7 @@ import (
 	"github.com/zyp461476492/docker-app/sdk/client"
 	"github.com/zyp461476492/docker-app/types"
 	"github.com/zyp461476492/docker-app/utils"
+	"log"
 	"time"
 )
 
@@ -104,6 +105,7 @@ func DockerInfo(id int) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
 		database.CloseStorm(db)
+		log.Print(err.Error())
 		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
 
