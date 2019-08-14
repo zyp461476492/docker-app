@@ -9,17 +9,25 @@ import (
 
 var ErrPoolClosed = errors.New("资源池已经关闭")
 
-type Pool struct {
+type StormPool struct {
 	lock      sync.Mutex
 	resources chan *storm.DB
 	factory   func() (*storm.DB, error)
 	closed    bool
 }
 
-func (p *Pool) Acquire() (*storm.DB, error) {
+func NewPool(fn func() (*storm.DB, error), size uint) *StormPool {
+	pool := StormPool{
+		resources: make(chan *storm.DB, size),
+		factory:   fn,
+	}
+	return &pool
+}
+
+func (p *StormPool) Acquire() (*storm.DB, error) {
 	select {
 	case r, flag := <-p.resources:
-		log.Printf("从通道 %s 中请求资源", r.Bolt.GoString())
+		log.Printf("从通道 %s 中请求资源", r)
 		var err error = nil
 		if !flag {
 			err = ErrPoolClosed
@@ -27,44 +35,46 @@ func (p *Pool) Acquire() (*storm.DB, error) {
 		return r, err
 	default:
 		log.Print("无可用资源，创建新资源")
-		return p.factory()
+		db, err := p.factory()
+		if err != nil {
+			log.Printf("获取资源发生异常 %s", err.Error())
+		} else {
+			log.Printf("获取资源成功 %s", db)
+		}
+		return db, err
 	}
 }
 
-func (p *Pool) Release(db *storm.DB) {
+func (p *StormPool) Release(db *storm.DB) {
 	p.lock.Lock()
+	log.Printf("开始释放资源 %s", db)
 	defer p.lock.Unlock()
 	// 资源池如果关闭，关闭掉现有的连接
 	if p.closed {
-		err := db.Close()
-		if err != nil {
-			log.Printf("关闭连接时发生异常,原因 %s", err.Error())
-		}
+		CloseStorm(db)
 		return
 	}
-	select {
-	case p.resources <- db:
-		log.Printf("释放连接 %s 至资源池", db.Bolt.GoString())
-	default:
-		// 资源池已满，关闭当前的连接
-		log.Printf("释放连接 %s 至资源池失败，当前资源池已满，转为关闭连接", db.Bolt.GoString())
-		err := db.Close()
-		if err != nil {
-			log.Printf("关闭连接时发生异常,原因 %s", err.Error())
+	if db == nil {
+		log.Printf("连接资源为空,无法进行释放！")
+	} else {
+		select {
+		case p.resources <- db:
+			log.Printf("释放连接 %s 至资源池", db)
+		default:
+			// 资源池已满，关闭当前的连接
+			log.Printf("释放连接 %s 至资源池失败，当前资源池已满，转为关闭连接", db)
+			CloseStorm(db)
 		}
 	}
 }
 
-func (p *Pool) Close() {
+func (p *StormPool) Close() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.closed = true
 	// 先关闭通道，随后关闭连接
 	close(p.resources)
 	for r := range p.resources {
-		err := r.Close()
-		if err != nil {
-			log.Printf("关闭连接时发生异常,原因 %s", err.Error())
-		}
+		CloseStorm(r)
 	}
 }

@@ -3,17 +3,14 @@ package database
 import (
 	"github.com/asdine/storm"
 	"github.com/zyp461476492/docker-app/types"
+	"go.etcd.io/bbolt"
 	"log"
+	"time"
 )
 
-var cli *storm.DB
-
-func GetStorm(config *types.Config) (*storm.DB, error) {
-	if cli == nil {
-		cli, err := storm.Open(config.FileLocation)
-		return cli, err
-	}
-	return cli, nil
+func GetStorm(config types.Config) (*storm.DB, error) {
+	return storm.Open(
+		config.FileLocation, storm.BoltOptions(0600, &bbolt.Options{Timeout: config.Timeout * time.Second}))
 }
 
 func CloseStorm(db *storm.DB) {
