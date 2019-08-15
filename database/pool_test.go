@@ -1,7 +1,6 @@
 package database
 
 import (
-	"github.com/asdine/storm"
 	"github.com/zyp461476492/docker-app/types"
 	"log"
 	"math/rand"
@@ -16,11 +15,7 @@ const (
 	poolSize      = 2  //资源池中的大小
 )
 
-var lock sync.Mutex
-
-func getDb() (*storm.DB, error) {
-	lock.Lock()
-	defer lock.Unlock()
+func getDb() (interface{}, error) {
 	config := types.Config{
 		FileLocation: "test.db",
 		Timeout:      10,
@@ -38,7 +33,7 @@ func TestGetStorm(t *testing.T) {
 	for i := 0; i < maxGoroutines; i++ {
 		go func(gid int) {
 			db, err := GetStorm(config)
-			defer CloseStorm(db)
+			//defer CloseStorm(db)
 			if err != nil {
 				log.Printf("新增时发生异常 %s ", err.Error())
 			} else {
@@ -54,7 +49,10 @@ func TestPool(t *testing.T) {
 	var wg sync.WaitGroup
 	// 同时并发数量
 	wg.Add(maxGoroutines)
-	myPool := NewPool(getDb, poolSize)
+	myPool, err := NewStormPool(1, 1, 2, getDb)
+	if err != nil {
+		t.Errorf("获取连接池失败，原因：%s", err.Error())
+	}
 	for i := 0; i < maxGoroutines; i++ {
 		//模拟请求
 		time.Sleep(time.Duration(rand.Intn(2)) * time.Second)
@@ -64,7 +62,6 @@ func TestPool(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
-	myPool.Close()
 }
 
 //定义一个查询方法,参数是当前 gorotine Id和资源池
