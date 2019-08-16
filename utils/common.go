@@ -50,4 +50,4 @@ func LogHttpError(err error, w *http.ResponseWriter) {
 	http.Error(*w, err.Error(), http.StatusInternalServerError)
 }
 
-//var Config = GetConfig("config.json")
+var Config = *GetConfig("config.json")
