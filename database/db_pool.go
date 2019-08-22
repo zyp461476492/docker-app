@@ -79,7 +79,7 @@ func (p *StormPool) Acquire() (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		// todo maxLifttime 最大等待时间
+
 		return resource, err
 	}
 }

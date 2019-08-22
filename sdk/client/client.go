@@ -17,6 +17,5 @@ func GetClient(asset localType.DockerAsset) (*client.Client, error) {
 
 func GetClientInfo(cli *client.Client) (types.Info, error) {
 	ctx := context.Background()
-
 	return cli.Info(ctx)
 }

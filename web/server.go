@@ -17,8 +17,6 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	for {
-		log.Fatal(s.ListenAndServe())
-	}
+	log.Fatal(s.ListenAndServe())
 
 }

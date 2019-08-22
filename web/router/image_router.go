@@ -2,9 +2,7 @@ package router
 
 import (
 	"encoding/json"
-	"github.com/zyp461476492/docker-app/sdk/client"
 	"github.com/zyp461476492/docker-app/sdk/image"
-	"github.com/zyp461476492/docker-app/types"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,33 +14,21 @@ func list(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	id, err := strconv.Atoi(r.Form.Get("id"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// 根据 ID 获取 docker 资源信息
-	asset := types.DockerAsset{Id: id}
-	cli, err := client.GetClient(asset)
-
+	id, err := strconv.Atoi(r.Form.Get("index"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	imageList, err := image.List(cli)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	jsonByte, err := json.Marshal(imageList)
+	msg := image.List(id)
+	jsonByte, err := json.Marshal(msg)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	value, err := w.Write(jsonByte)
 
 	if err != nil {
@@ -56,29 +42,17 @@ func history(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	imageId := r.Form.Get("imageId")
-	// 根据 ID 获取 docker 资源信息
-	asset := types.DockerAsset{Id: assetId}
-	cli, err := client.GetClient(asset)
+
+	msg := image.History(assetId, imageId)
+	jsonByte, err := json.Marshal(msg)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	history, err := image.History(cli, imageId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	jsonByte, err := json.Marshal(history)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	value, err := w.Write(jsonByte)
 
 	if err != nil {

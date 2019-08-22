@@ -106,6 +106,7 @@ func DockerInfo(id int) types.RetMsg {
 
 	cli, err := client.GetClient(asset)
 	if err != nil {
+		log.Printf("连接失败 %s", err.Error())
 		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
 
