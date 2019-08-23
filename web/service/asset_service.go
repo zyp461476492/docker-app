@@ -32,6 +32,7 @@ func AddAsset(asset *types.DockerAsset) types.RetMsg {
 func UpdateAsset(asset *types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
 	}
 
@@ -47,6 +48,7 @@ func UpdateAsset(asset *types.DockerAsset) types.RetMsg {
 func DeleteAsset(assetList []types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
 	}
 
@@ -66,6 +68,7 @@ func DeleteAsset(assetList []types.DockerAsset) types.RetMsg {
 func ListAsset(page, pageSize int) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
+		database.CloseStorm(db)
 		return types.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
 
@@ -89,6 +92,21 @@ func ListAsset(page, pageSize int) types.RetMsg {
 	obj["list"] = assetList
 	obj["total"] = total
 	return types.RetMsg{Res: true, Info: types.SUCCESS, Obj: obj}
+}
+
+func GetAsset(id int) (types.DockerAsset, error) {
+	db, err := database.GetStorm(utils.Config)
+	asset := types.DockerAsset{}
+	if err != nil {
+		database.CloseStorm(db)
+		return asset, err
+	}
+	err = db.One("Id", id, &asset)
+	if err != nil {
+		return asset, err
+	}
+
+	return asset, nil
 }
 
 func DockerInfo(id int) types.RetMsg {
