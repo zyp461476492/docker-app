@@ -18,5 +18,4 @@ func main() {
 	}
 
 	log.Fatal(s.ListenAndServe())
-
 }
