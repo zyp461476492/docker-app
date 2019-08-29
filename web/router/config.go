@@ -9,6 +9,7 @@ func ConfigRouter() {
 	http.HandleFunc("/container/list", containerList)
 	http.HandleFunc("/container/start", containerStart)
 	http.HandleFunc("/container/pause", containerPause)
+	http.HandleFunc("/container/unpause", containerUnpause)
 	http.HandleFunc("/container/stop", containerStop)
 	http.HandleFunc("/asset/add", addAsset)
 	http.HandleFunc("/asset/update", updateAsset)
