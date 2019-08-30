@@ -83,3 +83,7 @@ func history(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("return value %v, err %v", value, err)
 	}
 }
+
+func imagePull(w http.ResponseWriter, r *http.Request) {
+
+}
