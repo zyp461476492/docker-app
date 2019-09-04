@@ -3,20 +3,21 @@ package router
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/zyp461476492/docker-app/sdk/image"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	HandshakeTimeout: 5 * time.Second,
+	ReadBufferSize:   1024,
+	WriteBufferSize:  1024,
 }
 
 func list(w http.ResponseWriter, r *http.Request) {
@@ -95,35 +96,75 @@ func history(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func imagePull(w http.ResponseWriter, r *http.Request) {
+func imageDel(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
-	c, err := upgrader.Upgrade(w, r, nil)
-	defer c.Close()
-	if err != nil {
-		log.Printf("err %s", err.Error())
-	}
 	assetId, err := strconv.Atoi(r.Form.Get("assetId"))
 	if err != nil {
 		log.Fatalln(err)
 	}
 	imageId := r.Form.Get("imageId")
-	fmt.Printf("%d %s", assetId, imageId)
-	res, stream := image.PullImage(2, "docker.io/library/redis")
-	if !res.Res {
-		c.WriteMessage(1, []byte("pull error"))
+
+	msg := image.DelImage(assetId, imageId)
+	jsonByte, err := json.Marshal(msg)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	value, err := w.Write(jsonByte)
+
+	if err != nil {
+		log.Fatalf("return value %v, err %v", value, err)
+	}
+}
+
+func imagePull(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("err %s", err.Error())
+	}
+	assetId, err := strconv.Atoi(r.Form.Get("assetId"))
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	term := r.Form.Get("term")
+
+	res, stream := image.PullImage(assetId, "docker.io/library/"+term)
+	if !res.Res {
+		err = c.WriteMessage(1, []byte("{\"status\":"+res.Info+"}"))
+		if err != nil {
+			log.Printf("websocket WriteMessage error : %s", err.Error())
+		}
+		c.Close()
+	}
+
 	reader := bufio.NewReader(stream)
+
 	for {
 		str, err := reader.ReadString('\n')
 		if err != nil {
 			log.Printf("Read Error: %s", err)
+			err = stream.Close()
+			if err != nil {
+				log.Printf("stream close error: %s", err)
+			}
+			c.Close()
 			return
 		}
-		fmt.Println(str)
-		//c.WriteMessage(1, []byte(str))
-		c.WriteJSON(str)
+		err = c.WriteMessage(1, []byte(str))
+		if err != nil {
+			log.Printf("websocket WriteMessage error : %s", err.Error())
+			err = stream.Close()
+			if err != nil {
+				log.Printf("stream close error: %s", err)
+			}
+			c.Close()
+			return
+		}
 	}
 
 }
