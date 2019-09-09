@@ -8,16 +8,14 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
-	HandshakeTimeout: 5 * time.Second,
-	ReadBufferSize:   1024,
-	WriteBufferSize:  1024,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 func list(w http.ResponseWriter, r *http.Request) {
@@ -166,5 +164,4 @@ func imagePull(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 }

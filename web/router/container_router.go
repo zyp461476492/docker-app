@@ -1,7 +1,9 @@
 package router
 
 import (
+	"bufio"
 	"encoding/json"
+	"github.com/gorilla/websocket"
 	"github.com/zyp461476492/docker-app/sdk/container"
 	"log"
 	"net/http"
@@ -149,5 +151,56 @@ func containerStop(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Fatalf("return value %v, err %v", value, err)
+	}
+}
+
+func containerLogs(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("err %s", err.Error())
+	}
+	assetId, err := strconv.Atoi(r.Form.Get("assetId"))
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	containerId := r.Form.Get("containerId")
+
+	stream := container.Logs(assetId, containerId)
+
+	if stream == nil {
+		err = c.WriteMessage(1, []byte("{\"status\":"+"空"+"}"))
+		if err != nil {
+			log.Printf("websocket WriteMessage error : %s", err.Error())
+		}
+
+		c.Close()
+	}
+
+	reader := bufio.NewReader(stream)
+
+	for {
+		str, err := reader.ReadString('\n')
+		if err != nil {
+			log.Printf("Read Error: %s", err)
+			err = stream.Close()
+			if err != nil {
+				log.Printf("stream close error: %s", err)
+			}
+			c.Close()
+			return
+		}
+		// 去掉八个字节的头部信息
+		err = c.WriteMessage(websocket.TextMessage, []byte(str)[8:])
+		if err != nil {
+			log.Printf("websocket WriteMessage error : %s", err.Error())
+			err = stream.Close()
+			if err != nil {
+				log.Printf("stream close error: %s", err)
+			}
+			c.Close()
+			return
+		}
 	}
 }

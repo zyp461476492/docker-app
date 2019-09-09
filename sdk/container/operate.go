@@ -94,15 +94,3 @@ func Stop(assetId int, containerId string) myType.RetMsg {
 
 	return myType.RetMsg{Res: true}
 }
-
-func StartAll(assetId int) myType.RetMsg {
-	return myType.RetMsg{}
-}
-
-func PauseAll(assetId int) myType.RetMsg {
-	return myType.RetMsg{}
-}
-
-func StopAll(assetId int) myType.RetMsg {
-	return myType.RetMsg{}
-}

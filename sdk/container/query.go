@@ -3,7 +3,6 @@ package container
 import (
 	"context"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	myClient "github.com/zyp461476492/docker-app/sdk/client"
 	myType "github.com/zyp461476492/docker-app/types"
 	"github.com/zyp461476492/docker-app/web/service"
@@ -35,13 +34,48 @@ func List(id int) myType.RetMsg {
 /**
 container id or name
 */
-func logs(cli *client.Client, container string) (io.ReadCloser, error) {
-	ctx := context.Background()
+func Logs(assetId int, containerId string) io.ReadCloser {
+	asset, err := service.GetAsset(assetId)
+	if err != nil {
+		return nil
+	}
 
-	return cli.ContainerLogs(ctx, container, types.ContainerLogsOptions{})
+	cli, err := myClient.GetClient(asset)
+	if err != nil {
+		log.Printf("连接失败 %s", err.Error())
+		return nil
+	}
+
+	logs, err := cli.ContainerLogs(context.Background(), containerId, types.ContainerLogsOptions{
+		ShowStderr: true,
+		ShowStdout: true,
+		Details:    true,
+		Follow:     true,
+	})
+	if err != nil {
+		log.Printf("容器 LOGS 查询失败 %s", err.Error())
+		return nil
+	}
+	return logs
 }
 
-func diff(cli *client.Client, id string) ([]types.ContainerChange, error) {
-	ctx := context.Background()
-	return cli.ContainerDiff(ctx, id)
+func Stats(assetId int, containerId string) types.ContainerStats {
+	asset, err := service.GetAsset(assetId)
+	if err != nil {
+		return types.ContainerStats{}
+	}
+
+	cli, err := myClient.GetClient(asset)
+	if err != nil {
+		log.Printf("连接失败 %s", err.Error())
+		return types.ContainerStats{}
+	}
+
+	stats, err := cli.ContainerStats(context.Background(), containerId, true)
+	if err != nil {
+		log.Printf("容器 STATS 查询失败 %s", err.Error())
+		return types.ContainerStats{}
+	}
+
+	return stats
 }

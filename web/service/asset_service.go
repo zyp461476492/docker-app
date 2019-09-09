@@ -15,7 +15,7 @@ func AddAsset(asset *types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
 		database.CloseStorm(db)
-		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
+		return types.RetMsg{Res: false, Info: types.DatabaseFail}
 	}
 
 	asset.CreateTime = time.Now().Format("2006-01-02 15:04:05")
@@ -33,7 +33,7 @@ func UpdateAsset(asset *types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
 		database.CloseStorm(db)
-		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
+		return types.RetMsg{Res: false, Info: types.DatabaseFail}
 	}
 
 	err = db.Update(asset)
@@ -49,7 +49,7 @@ func DeleteAsset(assetList []types.DockerAsset) types.RetMsg {
 	db, err := database.GetStorm(utils.Config)
 	if err != nil {
 		database.CloseStorm(db)
-		return types.RetMsg{Res: false, Info: types.DATABASE_FAIL}
+		return types.RetMsg{Res: false, Info: types.DatabaseFail}
 	}
 
 	count := 0
