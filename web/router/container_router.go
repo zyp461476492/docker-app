@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func containerList(w http.ResponseWriter, r *http.Request) {
@@ -170,11 +171,6 @@ func containerStats(w http.ResponseWriter, r *http.Request) {
 	stats := container.Stats(assetId, containerId)
 
 	if stats.Body == nil {
-		err = c.WriteMessage(1, []byte("{\"status\":"+"空"+"}"))
-		if err != nil {
-			log.Printf("websocket WriteMessage error : %s", err.Error())
-		}
-
 		c.Close()
 	}
 
@@ -192,7 +188,7 @@ func containerStats(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// 去掉八个字节的头部信息
-		err = c.WriteMessage(websocket.TextMessage, []byte(str)[8:])
+		err = c.WriteMessage(websocket.TextMessage, []byte(str))
 		if err != nil {
 			log.Printf("websocket WriteMessage error : %s", err.Error())
 			err = stats.Body.Close()
@@ -202,6 +198,8 @@ func containerStats(w http.ResponseWriter, r *http.Request) {
 			c.Close()
 			return
 		}
+
+		time.Sleep(time.Duration(2) * time.Second)
 	}
 }
 
