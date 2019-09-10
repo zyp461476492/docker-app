@@ -51,6 +51,7 @@ func Logs(assetId int, containerId string) io.ReadCloser {
 		ShowStdout: true,
 		Details:    true,
 		Follow:     true,
+		Tail:       "50",
 	})
 	if err != nil {
 		log.Printf("容器 LOGS 查询失败 %s", err.Error())
