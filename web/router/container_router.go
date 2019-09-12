@@ -155,6 +155,36 @@ func containerStop(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func containerCreate(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	id, err := strconv.Atoi(r.Form.Get("assetId"))
+	containerName := r.Form.Get("containerName")
+	imageName := r.Form.Get("imageName")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	msg := container.Create(id, containerName, imageName)
+	jsonByte, err := json.Marshal(msg)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	value, err := w.Write(jsonByte)
+
+	if err != nil {
+		log.Fatalf("return value %v, err %v", value, err)
+	}
+}
+
 func containerStats(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	c, err := upgrader.Upgrade(w, r, nil)
