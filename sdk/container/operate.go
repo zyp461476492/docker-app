@@ -13,6 +13,61 @@ import (
 	"time"
 )
 
+func Create(assetId int, containerName, imageName string) myType.RetMsg {
+	asset, err := service.GetAsset(assetId)
+	if err != nil {
+		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	cli, err := myClient.GetClient(asset)
+	if err != nil {
+		log.Printf("连接失败 %s", err.Error())
+		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	config := container.Config{
+		Image: imageName,
+	}
+
+	portBinding := make(map[nat.Port][]nat.PortBinding)
+	portBinding["80/tcp"] = make([]nat.PortBinding, 5)
+	portBinding["80/tcp"][0] = nat.PortBinding{
+		HostIP:   "0.0.0.0",
+		HostPort: "1234",
+	}
+	hostConfig := container.HostConfig{}
+
+	networkConfig := network.NetworkingConfig{}
+	body, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, &networkConfig, containerName)
+	if err != nil {
+		log.Printf("创建失败 %s", err.Error())
+		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	return myType.RetMsg{Res: true, Obj: body}
+}
+
+func Remove(assetId int, containerId string) myType.RetMsg {
+	asset, err := service.GetAsset(assetId)
+	if err != nil {
+		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	cli, err := myClient.GetClient(asset)
+	if err != nil {
+		log.Printf("连接失败 %s", err.Error())
+		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	err = cli.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{})
+	if err != nil {
+		log.Printf("容器删除失败 %s", err.Error())
+		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
+	}
+
+	return myType.RetMsg{Res: true}
+}
+
 func Start(assetId int, containerId string) myType.RetMsg {
 	asset, err := service.GetAsset(assetId)
 	if err != nil {
@@ -76,40 +131,6 @@ func Unpause(assetId int, containerId string) myType.RetMsg {
 	return myType.RetMsg{Res: true}
 }
 
-func Create(assetId int, containerName, imageName string) myType.RetMsg {
-	asset, err := service.GetAsset(assetId)
-	if err != nil {
-		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
-	}
-
-	cli, err := myClient.GetClient(asset)
-	if err != nil {
-		log.Printf("连接失败 %s", err.Error())
-		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
-	}
-
-	config := container.Config{
-		Image: imageName,
-	}
-
-	portBinding := make(map[nat.Port][]nat.PortBinding)
-	portBinding["80/tcp"] = make([]nat.PortBinding, 5)
-	portBinding["80/tcp"][0] = nat.PortBinding{
-		HostIP:   "0.0.0.0",
-		HostPort: "1234",
-	}
-	hostConfig := container.HostConfig{}
-
-	networkConfig := network.NetworkingConfig{}
-	body, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, &networkConfig, containerName)
-	if err != nil {
-		log.Printf("创建失败 %s", err.Error())
-		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
-	}
-
-	return myType.RetMsg{Res: true, Obj: body}
-}
-
 func Stop(assetId int, containerId string) myType.RetMsg {
 	asset, err := service.GetAsset(assetId)
 	if err != nil {
@@ -121,6 +142,7 @@ func Stop(assetId int, containerId string) myType.RetMsg {
 		log.Printf("连接失败 %s", err.Error())
 		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
+
 	timeout := 2 * time.Second
 	err = cli.ContainerStop(context.Background(), containerId, &timeout)
 	if err != nil {
