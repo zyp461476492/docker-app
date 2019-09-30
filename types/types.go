@@ -14,6 +14,19 @@ type DockerAsset struct {
 	Status     string `json:"status"`
 }
 
+type ContainerCreateInfo struct {
+	AssetId       int       `json:"assetId"`
+	ContainerName string    `json:"containerName"`
+	ImageName     string    `json:"imageName"`
+	PortList      []PortMap `json:"portList"`
+}
+
+type PortMap struct {
+	Type       string `json:"type"`
+	DockerPort int    `json:"dockerPort"`
+	HostPort   int    `json:"hostPort"`
+}
+
 type Config struct {
 	FileLocation string
 	Timeout      time.Duration

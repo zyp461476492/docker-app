@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/zyp461476492/docker-app/sdk/container"
+	"github.com/zyp461476492/docker-app/types"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -45,15 +47,21 @@ func containerCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	id, err := strconv.Atoi(r.Form.Get("assetId"))
-	containerName := r.Form.Get("containerName")
-	imageName := r.Form.Get("imageName")
+
+	jsonStr, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	msg := container.Create(id, containerName, imageName)
+	info := types.ContainerCreateInfo{}
+	err = json.Unmarshal(jsonStr, &info)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	msg := container.Create(info)
 	jsonByte, err := json.Marshal(msg)
 
 	if err != nil {

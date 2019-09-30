@@ -17,5 +17,5 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.Println("服务已启动")
-	log.Fatal(s.ListenAndServe())
+	log.Panicln(s.ListenAndServe())
 }

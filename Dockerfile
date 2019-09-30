@@ -1,5 +1,7 @@
 FROM golang:latest
 
+MAINTAINER zhangyp
+
 WORKDIR /docker-app
 
 ADD . /docker-app

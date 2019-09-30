@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-func Create(assetId int, containerName, imageName string) myType.RetMsg {
-	asset, err := service.GetAsset(assetId)
+func Create(info myType.ContainerCreateInfo) myType.RetMsg {
+	asset, err := service.GetAsset(info.AssetId)
 	if err != nil {
 		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
 	}
@@ -26,7 +26,7 @@ func Create(assetId int, containerName, imageName string) myType.RetMsg {
 	}
 
 	config := container.Config{
-		Image: imageName,
+		Image: info.ImageName,
 	}
 
 	portBinding := make(map[nat.Port][]nat.PortBinding)
@@ -38,7 +38,7 @@ func Create(assetId int, containerName, imageName string) myType.RetMsg {
 	hostConfig := container.HostConfig{}
 
 	networkConfig := network.NetworkingConfig{}
-	body, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, &networkConfig, containerName)
+	body, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, &networkConfig, info.ContainerName)
 	if err != nil {
 		log.Printf("创建失败 %s", err.Error())
 		return myType.RetMsg{Res: false, Info: err.Error(), Obj: nil}
