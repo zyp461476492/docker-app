@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -29,13 +30,34 @@ func Create(info myType.ContainerCreateInfo) myType.RetMsg {
 		Image: info.ImageName,
 	}
 
-	portBinding := make(map[nat.Port][]nat.PortBinding)
-	portBinding["80/tcp"] = make([]nat.PortBinding, 5)
-	portBinding["80/tcp"][0] = nat.PortBinding{
-		HostIP:   "0.0.0.0",
-		HostPort: "1234",
+	portMap := make(map[int]int)
+	for _, portInfo := range info.PortList {
+		count, ok := portMap[portInfo.DockerPort]
+		if !ok {
+			portMap[portInfo.DockerPort] = 0
+			count = 0
+		}
+		portMap[portInfo.DockerPort] = count + 1
 	}
-	hostConfig := container.HostConfig{}
+
+	portBinding := make(map[nat.Port][]nat.PortBinding)
+	for _, portInfo := range info.PortList {
+		key := fmt.Sprintf("%d", portInfo.DockerPort) + "/" + portInfo.Type
+		bindList, ok := portBinding[nat.Port(key)]
+		if !ok {
+			bindList = make([]nat.PortBinding, 0, portMap[portInfo.DockerPort])
+		}
+		bindInfo := nat.PortBinding{
+			HostIP:   "0.0.0.0",
+			HostPort: fmt.Sprintf("%d", portInfo.HostPort),
+		}
+		bindList = append(bindList, bindInfo)
+		portBinding[nat.Port(key)] = bindList
+	}
+
+	hostConfig := container.HostConfig{
+		PortBindings: portBinding,
+	}
 
 	networkConfig := network.NetworkingConfig{}
 	body, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, &networkConfig, info.ContainerName)
