@@ -2,7 +2,7 @@
 
 一个轻量级，单机版本的 docker web 管理面板。
 
-本项目前后端分离，此为前端仓库，后端仓库见XXX。
+本项目前后端分离，此为后端仓库
 
 ## 技术栈
 
@@ -45,48 +45,25 @@
 列出了中重要文件和目录，有些通用文件进行了忽略。
 
 ```tree
-├── package.json  
-├── README.md
-├── .umirc.js UmiJs 配置文件
-├── src
-│   ├── App.js  UmiJs 自动生成文件
-│   ├── assets  UmiJs 自动生成资源目录
-│   ├── components  复用组件
-│   ├── config.json 配置文件，用于配置后台访问地址
-│   ├── global.css
-│   ├── layouts UmiJs layout 相关目录
-│   ├── models  全局 dvajs model
-│   ├── pages  页面
-│   ├── services  全局 services
-│   └── utils
-└── webpack.config.js UmiJs 自动生成文件
-```
-
-## 前端配置文件说明
-
-- apiUrl 配置后台服务路径
-- webSocketUrl 配置后台 websocket 服务路径
-
-```json
-{
-    "apiUrl": "http://127.0.0.1:8080",
-    "webSocketUrl": "ws://127.0.0.1:8080"
-}
+├─apix 轻量级 web 服务
+│  ├─example
+│  └─middleware
+├─database 数据库相关内容
+├─document 文档
+├─sdk docker go sdk
+│  ├─client docker client 相关内容
+│  ├─container 容器相关内容
+│  └─image 镜像相关内容
+├─types 实体类
+├─utils 工具类
+└─web web 服务 后续优化
+    ├─router
+    └─service
 ```
 
 ## 启动
 
-安装 nodejs 和 yarn，执行下列命令
-
 ```bash
-npm install
-yarn start
+go build -o dockerMain ./web
+./dockerMain
 ```
-
-## 部署
-
-```bash
-yarn build
-```
-
-
